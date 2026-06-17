@@ -27,24 +27,38 @@ HealthMarkers
 
 <!-- badges: start -->
 
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/HealthMarkers)](https://cran.r-project.org/package=HealthMarkers)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/HealthMarkers)](https://cran.r-project.org/package=HealthMarkers)
+[![GitHub release
+downloads](https://img.shields.io/github/downloads/sufyansuleman/HealthMarkers/total.svg)](https://github.com/sufyansuleman/HealthMarkers/releases)
 [![R-CMD-check](https://github.com/sufyansuleman/HealthMarkers/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sufyansuleman/HealthMarkers/actions/workflows/R-CMD-check.yaml)
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/1012367183.svg)](https://doi.org/10.5281/zenodo.20668334)
 <!-- badges: end -->
 
 # HealthMarkers
 
-You have a large data frame of clinical and lab measures. You want
-HOMA-IR, AIP, eGFR, NLR, and FIB-4, without writing a single formula.
-That is what HealthMarkers does.
+Computing derived clinical indices manually is slow, error-prone, and
+rarely documented. Researchers working with UK Biobank, NHANES, or any
+large clinical or phenotypic dataset routinely need HOMA-IR, eGFR,
+FIB-4, TyG index, ASCVD risk, NLR, Matsuda index, and WHtR, indices that
+each require a different formula, different input columns, and careful
+handling of missing values. HealthMarkers takes care of all of that. You
+pass in your data frame and get the markers back, each implemented from
+its primary source publication. No formula lookup, no unit checking, no
+silent NA propagation.
 
-**HealthMarkers** is an R toolkit for computing, standardising, and
-summarising clinical and research biomarkers directly from routine
-laboratory and phenotypic data. Over 50 specialist functions cover more
-than 290 biomarkers: from insulin sensitivity indices and cardiovascular
-risk scores to inflammatory aging clocks, frailty indices, psychiatric
-rating scales, and alternate-biofluids, all accessible through a single
-unified dispatcher, `all_health_markers()`.
+HealthMarkers is an R package for computing, standardising, and
+summarising derived health indices from routine laboratory and
+phenotypic data. More than 50 specialist functions cover over 290
+validated biomarkers across insulin sensitivity, lipid and
+cardiovascular risk, renal and hepatic function, inflammation and aging,
+body composition, psychiatric scales, and alternate biofluids. The
+unified dispatcher all_health_markers() runs every group at once and
+returns a single wide tibble; individual domain functions are available
+when you only need one panel.
 
 > **Full documentation, function reference, and articles** are available
 > at:\
@@ -91,16 +105,19 @@ health_summary(results[, new_cols])
 
 ## Installation
 
-``` r
-# From CRAN
-install.packages("HealthMarkers")
+Install the released version from CRAN:
 
-# Development version from GitHub
+``` r
+install.packages("HealthMarkers")
+```
+
+For the development version, install from GitHub:
+
+``` r
 remotes::install_github("sufyansuleman/HealthMarkers")
 ```
 
-Several marker groups require optional packages. Install only what you
-need:
+Some marker groups need optional packages. Install only those you use:
 
 ``` r
 install.packages(c(
@@ -109,21 +126,22 @@ install.packages(c(
   "QRISK3",        # QRISK3
   "RiskScorescvd", # SCORE2 / SCORE2-OP
   "rspiro",        # Spirometry GLI 2012 z-scores
-  "di",            # DXA-based insulin sensitivity
-  "mice",          # Multiple imputation
-  "missForest"     # Random-forest imputation
+  "di",            # frailty and DXA-based insulin sensitivity
+  "mice",          # multiple imputation
+  "missForest"     # random-forest imputation
 ))
 ```
 
-When an optional package is absent, its marker group is skipped safely;
-`verbose = TRUE` reports which groups ran and which were skipped.
+If an optional package is missing, its corresponding marker group is
+skipped safely. Use `verbose = TRUE` to see which groups were computed
+and which were omitted.
 
 ------------------------------------------------------------------------
 
 ## Quick start
 
-The package ships a simulated dataset (`n = 200`, 100+ columns) so you
-can run every example without your own data.
+A simulated dataset is included so you can explore the package without
+your own data.
 
 ``` r
 library(HealthMarkers)
@@ -133,13 +151,13 @@ sim       <- readRDS(sim_path)
 sim_small <- sim[1:50, ]   # small subset for speed
 ```
 
-**Step 1: find out what is already recognised in your data:**
+**Step 1: inspect auto-detected columns**
 
 ``` r
 hm_col_report(sim_small)
 ```
 
-**Step 2: compute several marker groups at once:**
+**Step 2: compute key marker groups in one call**
 
 ``` r
 out <- all_health_markers(
@@ -148,17 +166,12 @@ out <- all_health_markers(
   verbose = FALSE
 )
 
-# How many new columns were added?
 new_cols <- setdiff(names(out), names(sim_small))
-length(new_cols)
-
-# Preview the new markers
 head(out[, new_cols])
 ```
 
-> Note: this example is marked `eval=FALSE` in the README so rendering
-> stays fast. Run it interactively if you want to compute the full demo
-> output.
+> This example is shown with `eval=FALSE` so README rendering stays
+> fast. Run it interactively to generate the full demo output.
 
 **Step 3: call a single-purpose function when you need one biomerker or
 one gorup only:**
@@ -691,7 +704,7 @@ articles](https://sufyansuleman.github.io/HealthMarkers/articles/)
 | Topic | Article |
 |----|----|
 | Fasting insulin sensitivity (HOMA-IR, QUICKI, 15+ indices) | [fasting_is](https://sufyansuleman.github.io/HealthMarkers/articles/fasting_is.html) |
-| OGTT insulin sensitivity (Matsuda, Stumvoll, Gutt, 25+ indices) | [adipo_is](https://sufyansuleman.github.io/HealthMarkers/articles/adipo_is.html) |
+| OGTT insulin sensitivity (Matsuda, Stumvoll, Gutt, 25+ indices) | [ogtt_is](https://sufyansuleman.github.io/HealthMarkers/articles/ogtt_is.html) |
 | Glycaemic markers (TyG, METS-IR, LAR, diabetes flags) | [glycemic_markers](https://sufyansuleman.github.io/HealthMarkers/articles/glycemic_markers.html) |
 | Lipid and atherogenic indices | [lipid_markers](https://sufyansuleman.github.io/HealthMarkers/articles/lipid_markers.html) |
 | Cardiovascular risk scores (ASCVD, QRISK3, SCORE2) | [cvd_risk](https://sufyansuleman.github.io/HealthMarkers/articles/cvd_risk.html) |
@@ -753,9 +766,19 @@ When contributing a new marker function please:
 
 ## Citation
 
+To cite HealthMarkers in publications, please use:
+
+> Suleman, S. HealthMarkers: Toolkit for Clinical, Metabolic, and
+> Cardiovascular Biomarker Calculations. R package.
+> https://doi.org/10.5281/zenodo.20668334
+
+Or from R (always gives the entry for your installed version):
+
 ``` r
 citation("HealthMarkers")
 ```
+
+DOI (all versions): [10.5281/zenodo.20668334](https://doi.org/10.5281/zenodo.20668334)
 
 ------------------------------------------------------------------------
 
